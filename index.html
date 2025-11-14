@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temple Slot Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .current-time {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .section-time {
+            font-size: 0.9em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .slot {
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .slot:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .slot:disabled {
+            background: #dc3545;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            color: #764ba2;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .sections {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕉️ Temple Slot Booking</h1>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div class="sections" id="sectionsContainer"></div>
+    </div>
+
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book Your Slot</h2>
+                <p id="selectedSlotInfo"></p>
+            </div>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="place">Place *</label>
+                    <input type="text" id="place" required>
+                </div>
+                <div class="form-group">
+                    <label for="mobile">Mobile Number *</label>
+                    <input type="tel" id="mobile" pattern="[0-9]{10}" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-submit">Book Slot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect API URL (works for both local and Railway)
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : `${window.location.origin}/api`;
+        
+        console.log('🔗 Connecting to:', API_URL);
+        
+        const sections = [
+            { id: 1, name: 'Section 1', time: '12:00 PM – 1:00 PM' },
+            { id: 2, name: 'Section 2', time: '1:00 PM – 2:00 PM' },
+            { id: 3, name: 'Section 3', time: '2:00 PM – 3:00 PM' },
+            { id: 4, name: 'Section 4', time: '3:00 PM – 4:00 PM' },
+            { id: 5, name: 'Section 5', time: '4:00 PM – 5:00 PM' }
+        ];
+
+        let selectedSection = null;
+        let selectedSlot = null;
+
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentTime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        async function loadBookings() {
+            try {
+                const response = await fetch(`${API_URL}/bookings`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const bookings = await response.json();
+                renderSections(bookings);
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Failed to load bookings. Please refresh.', 'error');
+            }
+        }
+
+        function renderSections(bookings) {
+            const container = document.getElementById('sectionsContainer');
+            container.innerHTML = '';
+
+            sections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'section';
+                
+                const sectionBookings = bookings.filter(b => b.section_id === section.id);
+                
+                sectionDiv.innerHTML = `
+                    <div class="section-header">
+                        <div class="section-title">${section.name}</div>
+                        <div class="section-time">${section.time}</div>
+                    </div>
+                    <div class="slots">
+                        ${[1, 2, 3, 4, 5].map(slotNum => {
+                            const isBooked = sectionBookings.some(b => b.slot_number === slotNum);
+                            return `
+                                <button 
+                                    class="slot" 
+                                    ${isBooked ? 'disabled' : ''}
+                                    onclick="openBookingModal(${section.id}, ${slotNum})"
+                                >
+                                    Slot ${slotNum}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        function openBookingModal(sectionId, slotNumber) {
+            selectedSection = sectionId;
+            selectedSlot = slotNumber;
+            
+            const section = sections.find(s => s.id === sectionId);
+            document.getElementById('selectedSlotInfo').textContent = 
+                `${section.name} - Slot ${slotNumber} (${section.time})`;
+            
+            document.getElementById('bookingModal').classList.add('active');
+            document.getElementById('bookingForm').reset();
+        }
+
+        function closeModal() {
+            document.getElementById('bookingModal').classList.remove('active');
+            selectedSection = null;
+            selectedSlot = null;
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const bookingData = {
+                section_id: selectedSection,
+                slot_number: selectedSlot,
+                full_name: document.getElementById('fullName').value,
+                place: document.getElementById('place').value,
+                mobile: document.getElementById('mobile').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/bookings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('✅ Slot booked successfully!', 'success');
+                    closeModal();
+                    loadBookings();
+                } else {
+                    showAlert(result.message || 'Booking failed.', 'error');
+                }
+            } catch (error) {
+                showAlert('Error booking slot.', 'error');
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type} active`;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('active');
+            }, 5000);
+        }
+
+        document.getElementById('bookingModal').addEventListener('click', (e) => {
+            if (e.target.id === 'bookingModal') {
+                closeModal();
+            }
+        });
+
+        loadBookings();
+        setInterval(loadBookings, 30000);
+    </script>
+</body>
+</html>
